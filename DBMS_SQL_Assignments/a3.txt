@@ -1,0 +1,149 @@
+Borrow
+
+LOAN_NO	C_NAME	 B_NAME		AMOUNT
+--------- ---------- ------------- -------
+L1		SHREYASH	 SBIMumbai	2000
+L2		PAVAN	 PNBDelhi		3000
+L3		BIGHNA	 SBIKolkata	5000
+L4		GRACIE	 AxisMumbai	6000
+L5		TAYLOR	 ICCIDelhi	4000
+L6		MANISH	 PNBKolkata	14000
+
+Branch
+
+B_NAME		CITY
+------------  ------
+SBIMumbai		Mumbai
+PNBDelhi		Delhi
+SBIKolkata	Kolkata
+AxisMumbai	Mumbai
+ICCIDelhi		Delhi
+PNBKolkata	Kolkata
+
+Customer
+
+C_NAME		CITY
+------------   ------
+SHREYASH		Nagpur
+PAVAN		Kolkata
+BIGHNA		Siliguri
+GRACIE		Delhi
+TAYLOR		Mumbai
+MANISH		Ahmedabad
+
+Deposit
+
+ACT_NO	C_NAME	 B_NAME	    AMOUNT
+--------- --------- ------------ -------
+131412	SHREYASH	SBIMumbai	    10000
+243156	PAVAN	PNBDelhi	    13000
+124678	BIGHNA	SBIKolkata    8000
+531245	GRACIE	AxisMumbai    15000
+234616	TAYLOR	ICCIDelhi	    20000
+901289	MANISH	PNBKolkata    16000
+
+
+
+ANS 1.
+
+--Creating a view d1 for deposit table, excluding the account with act_no 901289.
+
+CREATE view d1 as
+select * from deposit where act_no<> '901289';
+
+ACT_NO	C_NAME	B_NAME		AMOUNT
+--------- --------- ------------- --------
+131412	SHREYASH	SBIMumbai		10000
+243156	PAVAN	PNBDelhi		13000
+124678	BIGHNA	SBIKolkata	8000
+531245	GRACIE	AxisMumbai	15000
+234616	TAYLOR	ICCIDelhi		20000
+
+--Insert another account with details of depositor who was left out of the view from deposit table. 
+
+insert into d1(act_no,c_name,b_name,amount)
+values('912245','MANISH','PNBKolkata',16000);
+
+ACT_NO	C_NAME	 B_NAME	    AMOUNT
+--------- --------- ------------ -------
+131412	SHREYASH	SBIMumbai	    10000
+243156	PAVAN	PNBDelhi	    13000
+124678	BIGHNA	SBIKolkata    8000
+531245	GRACIE	AxisMumbai    15000
+234616	TAYLOR	ICCIDelhi	    20000
+912245	MANISH	PNBKolkata    16000
+
+--Update the inserted account with new amount.
+
+update d1 set amount = 15000 where act_no = '912245';
+
+ACT_NO	C_NAME	 B_NAME	    AMOUNT
+--------- --------- ------------ -------
+131412	SHREYASH	SBIMumbai	    10000
+243156	PAVAN	PNBDelhi	    13000
+124678	BIGHNA	SBIKolkata    8000
+531245	GRACIE	AxisMumbai    15000
+234616	TAYLOR	ICCIDelhi	    20000
+912245	MANISH	PNBKolkata    15000
+
+--Delete the inserted account to set the view d1 back to how it was initially.
+
+delete from d1 where act_no = '912245';
+
+ACT_NO	C_NAME	B_NAME		AMOUNT
+--------- --------- ------------- --------
+131412	SHREYASH	SBIMumbai		10000
+243156	PAVAN	PNBDelhi		13000
+124678	BIGHNA	SBIKolkata	8000
+531245	GRACIE	AxisMumbai	15000
+234616	TAYLOR	ICCIDelhi		20000
+
+
+
+
+ANS 2.
+
+--Create a view of borrow, customer, branch tables where the amount is >= 5000.
+
+create view BorrowView AS 
+select borrow.loan_no,branch.b_name,customer.c_name,borrow.amount as LoanAmount from borrow,branch,customer where borrow.b_name = branch.b_name 
+and borrow.c_name = customer.c_name and borrow.amount >= 5000;
+
+LOAN_NO	B_NAME	  C_NAME	   LOANAMOUNT
+--------- ----------  ---------- -------
+L3		SBIKolkata  BIGHNA	   5000
+L4		AxisMumbai  GRACIE     6000
+L6		PNBKolkata  MANISH	   14000
+
+--Insert a borrower with some amount>=5000.
+
+insert into borrowView(loan_no,b_name,c_name,loanamount)
+values('L7','SBIMumbai','SHREYASH',7000);
+
+LOAN_NO	B_NAME	  C_NAME	   LOANAMOUNT
+--------- ----------  ---------- -------
+L3		SBIKolkata  BIGHNA	   5000
+L4		AxisMumbai  GRACIE     6000
+L6		PNBKolkata  MANISH	   14000
+L7		SBIMumbai   SHREYASH   7000
+
+--Update borrowView for loan_no L7 by increasing the borrowamount by 1000.
+
+update borrowView set loanamount = loanamount+1000 where LOAN_NO = 'L7';
+
+LOAN_NO	B_NAME	  C_NAME	   LOANAMOUNT
+--------- ----------  ---------- -------
+L3		SBIKolkata  BIGHNA	   5000
+L4		AxisMumbai  GRACIE     6000
+L6		PNBKolkata  MANISH	   14000
+L7		SBIMumbai   SHREYASH   8000
+
+--Delete the inserted account to reset the view as it was initially.
+
+delete from borrowView where loan_no = 'L7';
+
+LOAN_NO	B_NAME	  C_NAME	   LOANAMOUNT
+--------- ----------  ---------- -------
+L3		SBIKolkata  BIGHNA	   5000
+L4		AxisMumbai  GRACIE     6000
+L6		PNBKolkata  MANISH	   14000

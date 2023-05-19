@@ -1,0 +1,192 @@
+Joins and Correlations:-
+
+Movie Table:
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         1 Ironman                   Sci-Fi     5 stars
+       535
+
+         2 Avengers                  Action     5 stars
+      1015
+
+         3 Avatar                    Sci-Fi     5 stars
+       330
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         4 DDLJ                      Romance    5 stars
+       215
+
+         5 Captain Marvel            Sci-Fi     4 stars
+       435
+
+         6 Green Lantern             Action     4 stars
+       480
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         7 A Silent Voice            Tragedy    5 stars
+       235
+
+         8 Avengers Endgame          Sci-Fi     5 stars
+      1135
+
+         9 Dune                      Sci-Fi     3 stars
+       135
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+        10 Interstellar              Fantasy    5 stars
+       235
+
+Invoice Table:
+
+INV      MV_NO CUS ISSUE_DAT RETURN_DA
+--- ---------- --- --------- ---------
+I1           1 C1  02-AUG-22 02-OCT-22
+I2           2 C2  03-AUG-22 03-OCT-22
+I3           3 C3  04-AUG-22 04-OCT-22
+I4           4 C4  05-AUG-22 05-OCT-22
+I5           5 C5  06-AUG-22 06-OCT-22
+I6           6 C6  07-AUG-22 07-OCT-22
+I7           7 C7  08-AUG-22 08-OCT-22
+I8           8 C8  12-SEP-22 12-NOV-22
+I9           9 C9  15-SEP-22 15-NOV-22
+
+Cust Table:
+
+
+CUS LNAME           FNAME           AR   PHONE_NO
+--- --------------- --------------- -- ----------
+C1  Patil           Shreyash        MH   38105412
+C2  Kumar           Raj             UP   52143412
+C3  Teja            Sai             AN   68143412
+C4  Shinomiya       Kaguya          JP   38193412
+C5  Dhamne          Aditya          MH   68103112
+C6  Sarkar          Manav           WB   58173912
+C7  Gupta           Yash            MH   48103312
+C8  Chan            Chaki           WB   31818124
+C9  Arjun           Allu            TN   41241412
+
+• Find out the movie number which has been issued to ‘Sai’.
+Solution:
+
+SQL> select mv_no from invoice
+  2  INNER JOIN cust ON Invoice.cust_id=Cust.cust_id
+  3  where fname = 'Sai';
+
+Output:
+
+     MV_NO
+----------
+         3
+
+• Find the names and movie numbers of all the customers who have been issued a movie .
+Solution:
+
+SQL> select cust.Fname,cust.Lname,invoice.mv_no from cust
+  2  INNER JOIN invoice ON cust.cust_id = invoice.cust_id
+  3  where MV_NO is not NULL;
+
+Output:
+
+FNAME           LNAME                MV_NO
+--------------- --------------- ----------
+Shreyash        Patil                    1
+Raj             Kumar                    2
+Sai             Teja                     3
+Kaguya          Shinomiya                4
+Aditya          Dhamne                   5
+Manav           Sarkar                   6
+Yash            Gupta                    7
+Chaki           Chan                     8
+Allu            Arjun                    9
+
+• Select the title ,cust_id, mv_no for all the movies that are issued.
+Solution:
+
+SQL> select movie.title,invoice.cust_id,invoice.mv_no from invoice
+  2  INNER JOIN movie ON invoice.mv_no = movie.mv_no
+  3  where movie.mv_no is not NULL;
+
+Output:
+
+TITLE                     CUS      MV_NO
+------------------------- --- ----------
+Ironman                   C1           1
+Avengers                  C2           2
+Avatar                    C3           3
+DDLJ                      C4           4
+Captain Marvel            C5           5
+Green Lantern             C6           6
+A Silent Voice            C7           7
+Avengers Endgame          C8           8
+Dune                      C9           9
+
+• Find out the title and types of the movies that have been issued to ‘Raj’.
+Solution:
+
+SQL> select title,type from movie
+  2  INNER JOIN invoice ON movie.mv_no = invoice.mv_no
+  3  INNER JOIN cust ON invoice.cust_id = cust.cust_id
+  4  where fname = 'Raj';
+
+Output:
+
+TITLE                     TYPE
+------------------------- ----------
+Avengers                  Action
+
+• Find the names of customers who have been issued movie of type ‘Sci-Fi’.
+Solution:
+
+SQL> select Fname,Lname from movie
+  2  INNER JOIN invoice ON movie.mv_no = invoice.mv_no
+  3  INNER JOIN cust ON invoice.cust_id = cust.cust_id
+  4  where type = 'Sci-Fi';
+
+Output:
+
+FNAME           LNAME
+--------------- ---------------
+Shreyash        Patil
+Sai             Teja
+Aditya          Dhamne
+Chaki           Chan
+Allu            Arjun
+
+• Display the title, lname, fname for customers having movie number more than or
+equal to three , in the following format:
+‘The movie taken by {fname} {lname} is {title}.
+Solution:
+
+SQL> select 'The movie taken by ' || cust.fname ||' '|| cust.lname || ' is ' || movie.title
+  2  from movie
+  3  INNER JOIN invoice ON movie.mv_no = invoice.mv_no
+  4  INNER JOIN cust ON invoice.cust_id = cust.cust_id
+  5  where movie.mv_no >= 3;
+
+Output:
+
+'THEMOVIETAKENBY'||CUST.FNAME||''||CUST.LNAME||'IS'||MOVIE.TITLE
+-------------------------------------------------------------------------------
+The movie taken by Sai Teja is Avatar
+The movie taken by Kaguya Shinomiya is DDLJ
+The movie taken by Aditya Dhamne is Captain Marvel
+The movie taken by Manav Sarkar is Green Lantern
+The movie taken by Yash Gupta is A Silent Voice
+The movie taken by Chaki Chan is Avengers Endgame
+The movie taken by Allu Arjun is Dune
+

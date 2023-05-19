@@ -1,0 +1,340 @@
+1. Write a PL/SQl code to check a given year is leap year or not. 
+Solution:
+DECLARE
+  y NUMBER := 2020;
+BEGIN
+  IF MOD(y, 4)=0 AND MOD(y, 100)!=0 OR MOD(y, 400)=0 
+  	THEN
+    		dbms_output.Put_line(y|| ' is a leap year.');
+  ELSE
+	dbms_output.Put_line(y|| ' is not a leap year.');
+  END IF;
+END; 
+/
+	
+Output:
+
+2020 is a leap year.
+
+2. Write a pl/sql program to find whether a given number is palindrome or not. A palindrome number is that number which when reversed becomes the same as the original.
+Solution:
+
+DECLARE
+	num number;
+	m number;
+	temp number := 0;
+	rem number;
+
+BEGIN
+	num := 12321;
+	m := num;
+
+	WHILE num > 0
+	LOOP
+		rem := MOD(num, 10);
+		temp := (temp * 10) + rem;
+		num := TRUNC(num/10);
+	END LOOP;
+
+	IF m = temp
+	THEN
+		dbms_output.put_line(m||' is a Palidrome.');
+	ELSE
+		dbms_output.put_line(m||' is Not a Palidrome.');
+	END IF;
+END;
+/
+
+Output:
+
+12321 is a Palidrome.
+
+3. Write a pl/sql program to find whether a given number is an Armstrong number or not. An  Armstrong number is that number which is equal to the sum of the cubes of its digits. 
+Solution:
+
+DECLARE
+	num number;
+	s number:=0;
+	r number;
+	len number;
+	m number;
+
+BEGIN
+	num:=&num;
+	m := num;
+
+	len := length(to_char(num));
+	
+	WHILE num>0
+	LOOP
+		r := mod(num , 10);
+		s := s + power(r , len);
+		num := TRUNC(num / 10);
+	END LOOP;
+	
+	IF m = s
+	THEN
+		dbms_output.put_line(m||' is an ARMSTRONG NUMBER.');
+	ELSE
+		dbms_output.put_line(m||' is NOT an ARMSTRONG NUMBER.');
+	END IF;
+	
+END;
+
+Output:
+
+153 is an ARMSTRONG NUMBER.
+
+4. Write a pl/sql program to find GCD of three numbers. 
+Solution:
+
+DECLARE
+	num1 number;
+	num2 number;
+	num3 number;
+	x number;
+
+BEGIN
+	num1 := &num1;
+	num2 := &num2;
+	num3 := &num3;
+
+	
+	WHILE MOD(num2, num1) != 0
+	LOOP x := MOD(num2, num1);
+		num2 := num1;
+		num1 := x;
+	END LOOP;
+	WHILE MOD(num3, num1) != 0 
+	LOOP x := MOD(num3, num1);
+		num3 := num1;
+		num1 := x;
+	END LOOP;
+	dbms_output.put_line('The GCD is ' || num1);
+END;
+
+Output:
+
+The GCD is 4
+
+5. Write a pl/sql program to find LCM of three numbers. 
+Solution:
+
+DECLARE
+	num1 number;
+	num2 number;
+	num3 number;
+	temp number;
+BEGIN
+	num1 := &num1;
+	num2 := &num2;
+	num3 := &num3;
+	temp := num2;
+	
+	WHILE 1 > 0 
+	LOOP
+		IF MOD(temp, num1) = 0 AND MOD(temp, num2) = 0 THEN 
+			num1 := temp;
+			EXIT;
+		END IF;
+		temp := temp + 1;
+	END LOOP;
+	WHILE 1>0 
+	LOOP
+		IF MOD(temp, num1) = 0 AND MOD(temp, num3) = 0 THEN
+			num1 := temp;
+			EXIT;
+		END IF;
+		temp := temp + 1;
+	END LOOP;
+	dbms_output.put_line('The LCM is '||num1);
+END;
+
+Output:
+
+The LCM is 700
+
+6. Write a pl/sql program to find whether a given number is a perfect number or not. APerfect  number is that number which is equal to the sum of its divisors. 
+Solution:
+
+DECLARE
+	num1 number;
+	temp number;
+
+BEGIN
+	num1 := &num1;
+	temp := 0;
+	for i in 1..num1/2
+	LOOP
+		IF MOD(num1, i) = 0 THEN
+			temp := temp + i;
+		END IF;
+	END LOOP;
+	IF num1 = temp
+	THEN
+		dbms_output.put_line(num1||' is a Perfect Number.');
+	ELSE
+		dbms_output.put_line(num1||' is Not Perfect Number.');
+	END IF;
+END;
+
+Output:
+
+6 is a Perfect Number.
+
+7. Write a pl/sql program to count the number of vowels and consonants present in a given word. 
+Solution:
+
+DECLARE
+	vowelcount number;
+	consonantcount number;
+	text varchar(500) := 'RandomText';
+	C char;
+		
+BEGIN
+	vowelcount := 0;
+	consonantcount := 0;
+	for i in 1..Length(text) loop
+	    C := Substr(text, i, 1);
+		IF c in ( 'A', 'E', 'I', 'O', 'U' ) or c in ( 'a', 'e', 'i', 'o', 'u' ) then 
+			vowelcount := vowelcount+1;
+		ELSE 
+			consonantcount:= consonantcount + 1; 
+		END IF;
+	END LOOP;
+	dbms_output.Put_line('No. of Vowels: '|| vowelcount);
+	dbms_output.Put_line('No. of Consonants: ' || consonantcount);
+END;
+
+Output:
+
+No. of Vowels: 3
+No. of Consonants: 7
+
+8. Write a pl/sql program that accept account no from terminal and update the amount by adding Rs.2000 if the amount is less than 10000. The update is reflected in deposit table. 
+Solution:
+
+Deposit Table:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     SBIKolkata       8000
+531245     GRACIE     AxisMumbai      15000
+234616     TAYLOR     ICCIDelhi       20000
+901289     MANISH     PNBKolkata      16000
+
+DECLARE
+	acc deposit.ACT_NO%type;
+	amt deposit.amount%type;
+BEGIN
+	acc := &acc;
+	SELECT amount into amt FROM deposit WHERE act_no = acc;
+	if amt < 10000 then
+	amt := amt + 2000;
+	UPDATE deposit set amount = amt where act_no = acc;
+END IF;
+END;
+
+Output:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     SBIKolkata      10000
+531245     GRACIE     AxisMumbai      15000
+234616     TAYLOR     ICCIDelhi       20000
+901289     MANISH     PNBKolkata      16000
+
+9. Create an employee table (emp). Write a PL/SQL code for the following accept an employee code from the user and find the name of the employee. Add row in emp. If employee code is duplicate then display a message. 
+Solution:
+
+CREATE TABLE employee ( eno varchar2(4),
+			ename varchar2(10),
+			salary number(8,2) );
+
+INSERT INTO employee VALUES('e1', 'Ramesh', 10000); 
+INSERT INTO employee VALUES('e2', 'Suresh', 25000);
+
+SELECT * from employee;
+
+Table:
+
+ENO  ENAME          SALARY
+---- ---------- ----------
+e1   Ramesh          10000
+e2   Suresh          25000
+
+DECLARE
+	eid employee.eno%type; 
+	emp_name employee.ename%type;
+	errordetected EXCEPTION;
+	PRAGMA EXCEPTION_INIT(errordetected, -01422);
+	
+BEGIN
+	eid := &eid;
+	INSERT INTO employee VALUES('e1', 'Ramesh', 21000);
+	SELECT ename into emp_name from employee where eno = eid;
+	dbms_output.put_line('The name corresponding to ' || eid || ' is ' || emp_name);
+
+EXCEPTION
+    WHEN errordetected THEN
+    dbms_output.put_line('Error: Duplicate values for employee code '||eid);
+
+END;
+
+Output:
+
+Error: Duplicate values for employee code e1
+
+Table:
+
+select * from employee;
+
+ENO  ENAME          SALARY
+---- ---------- ----------
+e1   Ramesh          10000
+e2   Suresh          25000
+e1   Ramesh		   21000
+
+10) Write a pl/sql program for the following. Accept a branch name from the user. Delete all the
+borrow rows with that branch name. Show how many rows have been deleted.
+Solution:
+
+Borrow Table:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L5         TAYLOR     ICCIDelhi        4000
+L6         MANISH     PNBKolkata      14000
+
+DECLARE
+	bname Branch.B_name%type;
+	
+BEGIN
+	bname:=&bname;
+	DELETE FROM borrow WHERE B_name=bname; 
+	dbms_output.put_line('Total records deleted: ' || sql%rowcount);
+END;
+
+Output:
+
+Total records deleted: 1
+
+Borrow Table:
+
+select * from borrow;
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L5         TAYLOR     ICCIDelhi        4000

@@ -1,0 +1,276 @@
+Tables:
+
+SQL> select * from borrow;
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L5         TAYLOR     ICCIDelhi        4000
+L6         MANISH     PNBKolkata      14000
+
+
+SQL> select * from branch;
+
+B_NAME     CITY
+---------- ----------
+SBIMumbai  Mumbai
+PNBDelhi   Delhi
+SBIKolkata Kolkata
+AxisMumbai Mumbai
+ICCIDelhi  Delhi
+PNBKolkata Kolkata
+
+
+SQL> select * from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     SBIKolkata       8000
+531245     GRACIE     AxisMumbai      15000
+234616     TAYLOR     ICCIDelhi       20000
+901289     MANISH     PNBKolkata      16000
+
+
+SQL> select * from customer;
+
+C_NAME     CITY
+---------- ----------
+SHREYASH   Mumbai
+PAVAN      Kolkata
+BIGHNA     Siliguri
+GRACIE     Delhi
+TAYLOR     Mumbai
+MANISH     Kolkata
+
+11. List all cities where branches of SHREYASH and BIGHNA are located.
+Solution:
+
+select branch.city from branch, deposit 
+where deposit.b_name = branch.b_name and deposit.c_name = 'SHREYASH' or deposit.b_name = branch.b_name and deposit.c_name = 'BIGHNA'
+union
+select branch.city from branch, borrow 
+where borrow.b_name = branch.b_name and borrow.c_name = 'SHREYASH' or borrow.b_name = branch.b_name and borrow.c_name = 'BIGHNA';
+
+Output:
+
+CITY
+----------
+Kolkata
+Mumbai
+
+12.List the name of the branch having highest no. of depositors.
+Solution:
+
+Updated Table:
+
+SQL> update deposit
+  2  SET b_name = 'SBIMumbai' where C_name = 'GRACIE';
+
+1 row updated.
+
+SQL> update deposit
+  2  SET b_name = 'PNBKolkata' where C_name = 'BIGHNA';
+
+
+SQL> update deposit
+  2  SET b_name = 'SBIMumbai' where C_name = 'TAYLOR';
+
+SQL> select * from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       8000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     MANISH     PNBKolkata      16000
+
+select b_name from deposit group by (b_name) having count(c_name) = 
+								(select max(count(c_name)) from deposit group by (b_name));
+
+Output:
+
+B_NAME
+----------
+SBIMumbai
+
+13. List the name of customers having maximum deposit.
+Solution:
+
+select c_name,amount from deposit where amount = (select max(amount) from deposit);
+
+Output:
+
+C_NAME         AMOUNT
+---------- ----------
+TAYLOR          20000
+
+14. List all the customers, along with their amount, who are either borrowers or
+depositors and living city is Delhi.
+Solution:
+
+select deposit.c_name, deposit.amount from customer,deposit 
+where customer.city = 'Delhi' and deposit.c_name = customer.c_name
+union
+select borrow.c_name, borrow.amount from customer,borrow
+where customer.city = 'Delhi' and borrow.c_name = customer.c_name;
+
+Output:
+
+c_name	amount
+GRACIE	6000
+GRACIE	15000
+
+15. List all the depositors having deposit in all the branches where SHREYASH is having
+account.
+Solution:
+
+Updated Table:
+
+update deposit
+  SET b_name = 'SBIMumbai' where C_name = 'GRACIE';
+
+update deposit
+  SET b_name = 'PNBKolkata' where C_name = 'BIGHNA';
+
+update deposit
+  SET b_name = 'SBIMumbai' where C_name = 'TAYLOR';
+
+update deposit
+ SET c_name = 'SHREYASH' where act_no = '131412';
+ 
+SQL> select * from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       8000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     MANISH     PNBKolkata      16000
+
+select c_name from deposit where b_name = (select b_name from deposit where c_name = 'SHREYASH');
+
+Output:
+
+C_NAME
+----------
+SHREYASH
+GRACIE
+TAYLOR
+
+16. List total deposit of the customers living in the city where SHREYASH is living.
+Solution:
+
+select SUM(deposit.amount) from customer,deposit 
+where deposit.c_name = customer.c_name and 
+customer.city = (select city from customer where c_name = 'SHREYASH'); 
+
+Output:
+
+SUM(DEPOSIT.AMOUNT)
+-------------------
+              30000
+
+17. List the name of the customers in ‘SBIMumbai’ branch having more deposits than
+any other customer in same branch.
+Solution:
+
+select c_name from deposit where b_name = 'SBIMumbai' group by c_name having sum(amount) = 
+(select max(amount) from (select sum(amount) as amount from deposit where b_name = 'SBIMumbai' group by c_name));
+
+Output:
+
+c_name
+-------
+TAYLOR
+
+18. List the name of the customers having highest deposits in the city where branch of
+BIGHNA is located.
+Solution:
+Updated Table:
+SQL> select * from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     SBIKolkata       8000
+531245     GRACIE     AxisMumbai      15000
+234616     TAYLOR     ICCIDelhi       20000
+901289     MANISH     PNBKolkata      16000
+
+select c_name, amount from deposit,branch
+where deposit.b_name = branch.b_name
+and branch.city in (select city from deposit,branch where c_name = 'BIGHNA' and deposit.b_name = branch.b_name)
+group by(c_name) having sum(amount) >= all (
+select sum(amount) from deposit,branch
+where deposit.b_name = branch.b_name
+and branch.city in (select city from deposit,branch where c_name = 'BIGHNA' and deposit.b_name = branch.b_name)
+group by(c_name));
+
+Output:
+
+c_name	   amount
+--------  ---------
+MANISH	   16000
+
+19. List the name of the depositors having maximum deposits among depositors of Mumbai
+for the branch ‘SBIMumbai’.
+Solution:
+update deposit
+  SET b_name = 'SBIMumbai' where C_name = 'GRACIE';
+
+update deposit
+  SET b_name = 'PNBKolkata' where C_name = 'BIGHNA';
+
+update deposit
+  SET b_name = 'SBIMumbai' where C_name = 'TAYLOR';
+
+update deposit
+  SET c_name = 'SHREYASH' where C_name = 'MANISH';
+ 
+SQL> select * from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       8000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     SHREYASH   PNBKolkata      16000
+
+select deposit.c_name, sum(amount) from customer, deposit
+where customer.city = 'Mumbai'
+and customer.c_name = deposit.c_name
+and deposit.b_name = 'SBIMumbai'
+group by deposit.c_name having sum(amount) >= all (select max(sum(amount)) from deposit, customer
+where customer.c_name = deposit.c_name and customer.city = 'Mumbai' and deposit.b_name = 'SBIMumbai' group by deposit.c_name);
+
+Output:
+
+C_NAME     SUM(AMOUNT)
+---------- -----------
+TAYLOR           20000
+
+20. Give the name of the branches having the no. of depositors more than the no. of
+borrowers.
+Solution:
+
+select deposit.b_name from deposit group by b_name having count(c_name) >
+all(select count(borrow.c_name) from borrow where borrow.b_name=deposit.b_name group by b_name );
+
+Output:
+
+B_NAME
+----------
+PNBKolkata
+SBIMumbai

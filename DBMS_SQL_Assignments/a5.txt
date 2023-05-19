@@ -1,0 +1,292 @@
+1. Write a cursor program to delete first 2 rows in employee table getting
+highest salary.
+Solution:
+
+CREATE TABLE Employee(
+eid NUMBER(5) PRIMARY KEY,
+ename VARCHAR2(20),
+salary NUMBER(8,2)
+);
+
+INSERT INTO Employee 
+VALUES(21,'Shreyash',50000);
+
+INSERT INTO Employee 
+VALUES(19,'Harsh',60000);
+
+INSERT INTO Employee 
+VALUES(18,'Ankit',60000);
+
+Table:
+
+EID	ENAME		SALARY
+----- ----------- -------
+21	Shreyash	50000
+19	Harsh		60000
+18	Ankit		60000
+
+
+DECLARE
+	sal Employee.salary%TYPE;
+	CURSOR highestSal IS
+		SELECT salary FROM Employee ORDER BY salary desc;
+BEGIN
+	OPEN highestSal;
+	LOOP
+		FETCH highestSal INTO sal;
+		DELETE Employee
+		WHERE salary = sal;
+		EXIT WHEN highestSal%ROWCOUNT = 2;
+	END LOOP;
+	CLOSE highestSal;
+END;
+
+Output:
+
+select * from employee;
+
+EID	ENAME		SALARY
+---- ------------ -------
+21	Shreyash	50000
+
+
+2. Consider a employee table. Write a cursor program to raise the salary of
+the employees by 15% who are in ‘Kolkata’ and display how many rows
+are affected in the Employee table.
+Solution:
+
+ALTER TABLE Employee
+ADD City varchar2(15);
+
+INSERT INTO Employee 
+VALUES(19,'Harsh',60000,'Kolkata');
+
+INSERT INTO Employee 
+VALUES(18,'Ankit',60000,'Delhi');
+
+Table:
+EID	ENAME		SALARY	CITY
+---- ----------- ---------- ----------
+21	Shreyash	50000		Mumbai
+19	Harsh		60000		Kolkata
+18	Ankit		60000		Delhi
+
+DECLARE
+	c NUMBER;
+	id Employee.eid%TYPE;
+	CURSOR salUpdate IS
+		SELECT eid FROM Employee WHERE City = 'Kolkata';
+BEGIN
+	OPEN salUpdate;
+	LOOP
+		FETCH salUpdate INTO id;
+		UPDATE Employee
+		SET salary = salary * 1.15
+		WHERE eid = id;
+		c := salUpdate%ROWCOUNT;
+		EXIT WHEN salUpdate%NOTFOUND;
+	END LOOP;
+	CLOSE salUpdate;
+	dbms_output.put_line(c || ' rows updated.');
+END;
+
+Output:
+
+1 row(s) updated.
+
+3. Accept two account numbers from the terminal. Write a PL/SQL
+procedure to do the following.
+
+a) Transfer Rs. 2000 from one account to another account.
+If there is no sufficient balance in the account to transfer, then show
+appropriate message.
+Solution:
+Deposit table:
+ACT_NO	C_NAME	B_NAME	AMOUNT
+---------- ------------ ----------- -------
+131412	SHREYASH	SBIMumbai	10000
+243156	PAVAN		PNBDelhi	13000
+124678	BIGHNA	SBIKolkata	8000
+531245	GRACIE	AxisMumbai	15000
+234616	TAYLOR	ICCIDelhi	20000
+901289	MANISH	PNBKolkata	16000
+
+DECLARE
+	act_no1 Deposit.act_no%TYPE;
+	act_no2 Deposit.act_no%TYPE;
+	amt Deposit.amount%TYPE;
+BEGIN
+	act_no1 := '&act_no1';
+	act_no2 := '&act_no2';
+	SELECT amount INTO amt FROM Deposit WHERE act_no = act_no1;
+	IF amt > 10000 THEN
+		UPDATE Deposit
+		SET amount = amount - 10000
+		WHERE act_no = act_no1;
+		
+		UPDATE Deposit
+		SET amount = amount + 10000
+		WHERE act_no = act_no2;
+		
+		dbms_output.put_line('Amount transferred successfully.');
+	ELSE
+		dbms_output.put_line(act_no1|| ' account does not have sufficient balance.');
+	END IF;
+	
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			dbms_output.put_line('Invalid Input!');
+END;
+
+Output:
+
+124678 account does not have sufficient balance.
+
+b) Write a cursor program to raise 5% of the present account balance to
+the first three customers who are older than 60.
+Solution:
+
+Updated Deposit Table:
+
+ACT_NO	C_NAME	B_NAME	AMOUNT	AGE
+---------- ----------- ------------ -------- --------
+131412	SHREYASH	SBIMumbai	10000		25
+243156	PAVAN		PNBDelhi	13000		65
+124678	BIGHNA	SBIKolkata	8000		46
+531245	GRACIE	AxisMumbai	15000		71
+234616	TAYLOR	ICCIDelhi	20000		80
+901289	MANISH	PNBKolkata	16000		62
+
+DECLARE
+	act Deposit.act_no%TYPE;
+	CURSOR old IS
+		SELECT act_no FROM Deposit WHERE age > 60 ORDER BY Act_no;
+BEGIN
+	OPEN old;
+	LOOP
+		FETCH old INTO act;
+		UPDATE Deposit
+		SET amount = amount * 1.05
+		WHERE act_no = act;
+		EXIT WHEN old%ROWCOUNT = 3;
+	END LOOP;
+	CLOSE old;
+END;
+
+Output:
+
+ACT_NO	C_NAME	B_NAME	AMOUNT	AGE
+---------- ----------- ----------- ---------- --------
+131412	SHREYASH	SBIMumbai	10000		25
+243156	PAVAN		PNBDelhi	13650		65
+124678	BIGHNA	SBIKolkata	8000		46
+531245	GRACIE	AxisMumbai	15750		71
+234616	TAYLOR	ICCIDelhi	21000		80
+901289	MANISH	PNBKolkata	16000		62
+
+4. Write a PL/SQL block of code that first inserts a record in an ‘emp’
+table. Update the salary by Rs. 2000. Then check to see that the total
+salary of the employees does not exceed 20000. If so, undo the updates
+made to the salary.
+Solution:
+
+DECLARE
+	empno EMP.ENO%TYPE;
+	name EMP.ENAME%TYPE;
+	new_age EMP.AGE%TYPE;
+	sal EMP.SALARY%TYPE;
+
+	CURSOR check_sal IS
+		SELECT ENO, SALARY FROM EMP;
+
+BEGIN
+	empno := '&empno';
+	name := '&name';
+	new_age := '&new_age';
+	sal := '&sal';
+	
+	INSERT INTO EMP VALUES(empno, name, new_age, sal);
+	UPDATE EMP
+	SET salary = salary + 2000;
+	
+	OPEN check_sal;	
+	LOOP
+		FETCH check_sal INTO empno, sal;
+		IF SAL > 20000 THEN
+			UPDATE EMP
+			SET salary = salary-2000
+			WHERE ENO = empno;
+			dbms_output.put_line('Salary reduced.');
+		END IF;
+		EXIT WHEN check_sal%NOTFOUND;
+	END LOOP;
+	CLOSE check_sal;
+END;
+
+5. Consider the emp table (eno, sal, dno, add).Find the salary of the
+employee for a given department no. If the department no. is not included
+in the emp table or a numbers of rows for a given dno then handle
+through exception handler.
+Solution:
+
+DECLARE
+	dept EMP_2.DNO%TYPE;
+	sal EMP_2.SALARY%TYPE;
+BEGIN
+	dept := &dept;
+	SELECT salary INTO sal FROM EMP_2 WHERE DNO = dept;
+	dbms_output.put_line('Salary = ' || sal);
+	
+	EXCEPTION 
+		WHEN NO_DATA_FOUND THEN
+			dbms_output.put_line('No data found for the department number.');
+END;
+
+6. Consider the table product (pno, pname, actual_price, sale_price). For a
+given pno, profit can be calculated by actual_price and sale_price. Find
+out the profit of a given pno. If the pno is not included in the table
+product or profit is zero (handle by user defined exception), then handle
+the error.
+
+Solution:
+
+CREATE TABLE PRODUCT(
+PNO NUMBER(3) PRIMARY KEY,
+PNAME VARCHAR2(15) NOT NULL,
+ACTUAL_PRICE NUMBER(5,2),
+SALE_PRICE NUMBER(5,2)
+);
+
+INSERT INTO PRODUCT VALUES(101,'Chips',200,150);
+
+INSERT INTO PRODUCT VALUES(102,'Toy',950,850);
+
+INSERT INTO PRODUCT VALUES(103,'Book',500,250);
+
+INSERT INTO PRODUCT VALUES(104,'Pens',600,590);
+
+INSERT INTO PRODUCT VALUES(105,'Papers',300,300);
+
+DECLARE
+	ap PRODUCT.ACTUAL_PRICE%TYPE;
+	sp PRODUCT.SALE_PRICE%TYPE;
+	no PRODUCT.PNO%TYPE;
+	profit PRODUCT.SALE_PRICE%TYPE;
+	NO_PROFIT EXCEPTION;
+BEGIN
+	no := &no;
+	SELECT ACTUAL_PRICE, SALE_PRICE INTO ap, sp FROM PRODUCT WHERE PNO = no;
+	profit := ap - sp;
+	IF profit = 0 THEN
+		RAISE NO_PROFIT;
+	ELSE
+		dbms_output.put_line('Profit = ' || profit);
+	END IF;
+	
+	EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			dbms_output.put_line('ERROR: No data found for corresponding PNO.');
+		WHEN NO_PROFIT THEN
+			dbms_output.put_line('ERROR: Profit is zero.');
+END;
+

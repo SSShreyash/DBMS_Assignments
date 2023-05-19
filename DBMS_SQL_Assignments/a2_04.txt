@@ -1,0 +1,231 @@
+Tables:
+
+Borrow Table:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L5         TAYLOR     ICCIDelhi        4000
+L6         MANISH     PNBKolkata      14000
+
+Deposit Table:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       8000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     SHREYASH   PNBKolkata      16000
+
+Branch Table:
+
+B_NAME     CITY
+---------- ----------
+SBIMumbai  Mumbai
+PNBDelhi   Delhi
+SBIKolkata Kolkata
+AxisMumbai Mumbai
+ICCIDelhi  Delhi
+PNBKolkata Kolkata
+
+Customer Table:
+
+C_NAME     CITY
+---------- ----------
+SHREYASH   Mumbai
+PAVAN      Kolkata
+BIGHNA     Siliguri
+GRACIE     Delhi
+TAYLOR     Mumbai
+MANISH     Kolkata
+
+21. Give the names of the borrowers having the same branch city and highest borrower.
+Solution:
+
+Select Borrow.C_name FROM Borrow,Branch WHERE Branch.B_name = Borrow.B_name AND 
+Branch.City IN (Select City FROM Branch WHERE B_name IN (Select B_name FROM Borrow GROUP BY B_name HAVING COUNT(C_name) >= 
+									   ALL(Select COUNT(C_name) FROM BORROW GROUP BY(B_name))));
+
+Output:
+
+SHREYASH   SBIMumbai
+BIGHNA     SBIMumbai
+GRACIE     AxisMumbai
+
+22. Give 10% interest to all depositors living in Kolkata and branch city in Delhi.
+Solution:
+
+(SELECT C_name,(1.1 * amount) AS Amount 
+ FROM deposit WHERE B_name IN 
+ (SELECT B_name FROM Branch WHERE city = 'Delhi')) 
+ INTERSECT (SELECT C_name,(1.1 * amount) AS Amount 
+ FROM deposit WHERE C_name IN 
+ (SELECT C_name FROM Customer WHERE city = 'Kolkata'));
+
+Output:
+
+C_NAME         AMOUNT
+---------- ----------
+PAVAN           14300
+
+23. Assign to the deposit of SHREYASH the maximum deposit from ‘SBIMumbai’ branch.
+Solution:
+
+Update Deposit SET Amount=(Select MAX(Amount) FROM Deposit WHERE B_Name='SBIMumbai') WHERE C_Name=
+'SHREYASH';
+
+Output:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       20000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       8000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     MANISH     PNBKolkata      16000
+
+24. Transfer Rs. 1000 from the account of MANISH to the account of BIGHNA if both are having
+same branch.
+Solution:
+
+Update Deposit SET Amount=Amount+1000 WHERE C_Name = 'BIGHNA' AND Deposit.B_name=(Select Deposit.B_name FROM Deposit where Deposit.C_name = 'MANISH');
+
+Output:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       20000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     PNBKolkata       9000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       20000
+901289     MANISH     PNBKolkata      16000
+
+25. Add Rs.1000 to the account of those depositors who are having highest deposit
+amount in their respective branches.
+Solution:
+
+Update Deposit SET Amount=Amount+1000 WHERE (C_Name,B_Name) IN (Select d1.C_Name,d1.B_Name FROM
+ Deposit d1 GROUP BY d1.C_Name,d1.B_Name HAVING SUM(d1.amount)>=ALL (Select MAX(d2.Amount) FROM Deposit d2 where d1.B_Name=d2.B_Name GROUP BY d2.B_Name));
+
+Output:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       21000
+243156     PAVAN      PNBDelhi        14000
+124678     BIGHNA     PNBKolkata       9000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       21000
+901289     MANISH     PNBKolkata      17000
+
+26. Add Rs.1000 to the amount of all depositors having deposit equal to or higher
+than the average deposit of their branches.
+Solution:
+
+Update Deposit SET Amount=Amount+1000 WHERE (C_Name,B_Name) IN 
+										(Select d1.C_Name,d1.B_Name FROM Deposit d1 GROUP BY d1.C_Name,d1.B_Name HAVING SUM(d1.amount)>=
+										 ALL (Select AVG(d2.Amount) FROM Deposit d2 where d1.B_Name=d2.B_Name GROUP BY d2.B_Name));
+
+Output:
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       22000
+243156     PAVAN      PNBDelhi        15000
+124678     BIGHNA     PNBKolkata       9000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       22000
+901289     MANISH     PNBKolkata      18000
+
+27. Delete borrower of branches having average loan less than 5000.
+Solution:
+Updated borrow Table:
+
+update borrow
+  SET b_name = 'SBIMumbai' where C_name = 'GRACIE';
+
+update borrow
+  SET b_name = 'PNBKolkata' where C_name = 'BIGHNA';
+
+update borrow
+  SET b_name = 'SBIMumbai' where C_name = 'TAYLOR';
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     PNBKolkata       5000
+L4         GRACIE     SBIMumbai        6000
+L5         TAYLOR     SBIMumbai        4000
+L6         MANISH     PNBKolkata      14000
+
+Delete from Borrow WHERE B_name in (Select B_name FROM Borrow GROUP BY B_name HAVING AVG(Amount) < 5000);
+
+Output:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L3         BIGHNA     PNBKolkata       5000
+L6         MANISH     PNBKolkata      14000
+
+28. Delete the borrower of branches having minimum number of customers.
+Solution:
+
+Borrow Table:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     PNBKolkata       5000
+L4         GRACIE     SBIMumbai        6000
+L5         TAYLOR     SBIMumbai        4000
+L6         MANISH     PNBKolkata      14000
+
+Delete from Borrow WHERE B_name in (Select B_name FROM Borrow GROUP BY B_name HAVING COUNT(loan_no) <= (Select COUNT(loan_no) FROM Borrow GROUP BY B_name));
+
+Output:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L3         BIGHNA     PNBKolkata       5000
+L4         GRACIE     SBIMumbai        6000
+L5         TAYLOR     SBIMumbai        4000
+L6         MANISH     PNBKolkata      14000
+
+29. Delete the deposit of MANISH and PAVAN if both are having same living city.
+Solution:
+
+Customer Table:
+
+C_NAME     CITY
+---------- ----------
+SHREYASH   Mumbai
+PAVAN      Kolkata
+BIGHNA     Siliguri
+GRACIE     Delhi
+TAYLOR     Mumbai
+MANISH     Kolkata
+
+Delete from Deposit where C_name in ('MANISH', 'PAVAN') AND EXISTS (Select * FROM Customer C1,Customer C2 WHERE C1.C_NAME='MANISH' AND C2.C_NAME='PAVAN' AND C1.CITY=C2.CITY); 
+
+Output:
+
+select* from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       22000
+124678     BIGHNA     PNBKolkata       9000
+531245     GRACIE     SBIMumbai       15000
+234616     TAYLOR     SBIMumbai       22000
+
+

@@ -1,0 +1,266 @@
+
+Customer Table.
+
+CUS LNAME           FNAME           AR   PHONE_NO
+--- --------------- --------------- -- ----------
+C1  Patil           Shreyash        MH   38105412
+C2  Kumar           Raj             UP   52143412
+C3  Teja            Sai             AN   68143412
+C4  Shinomiya       Kaguya          JP   38193412
+C5  Dhamne          Aditya          MH   68103112
+C6  Sarkar          Manav           WB   58173912
+C7  Gupta           Yash            MH   48103312
+
+
+Movie table:
+
+   MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         1 Ironman                   Sci-Fi     5 stars
+       535
+
+         2 Avengers                  Action     5 stars
+      1015
+
+         3 Avatar                    Sci-Fi     5 stars
+       330
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         4 DDLJ                      Romance    5 stars
+       215
+
+         5 Captain Marvel            Sci-Fi     4 stars
+       435
+
+         6 Green Lantern             Action     4 stars
+       480
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+         7 A Silent Voice            Tragedy    5 stars
+       235
+
+         8 Avengers Endgame          Sci-Fi     5 stars
+      1135
+
+         9 Dune                      Sci-Fi     3 stars
+       135
+
+
+     MV_NO TITLE                     TYPE       STAR
+---------- ------------------------- ---------- -------------------------
+     PRICE
+----------
+        10 Interstellar              Fantasy    5 stars
+       235
+
+
+
+
+Set Function and Concatenation:-
+
+• Count the total no. of customers.
+Solution:
+
+SQL> select count(*) from cust;
+
+Output:
+
+  COUNT(*)
+----------
+         7
+
+19.Calculate the total price of all movies.
+Solution:
+
+SQL> select sum(price) from movie;
+
+Output:
+
+SUM(PRICE)
+----------
+      4750
+
+20.Calculate the average price of all movies.
+Solution:
+
+SQL> select avg(price) from movie;
+
+Output:
+
+AVG(PRICE)
+----------
+       475
+
+• Calculate the maximum and minimum movie prices. Rename the title as max_price
+and min_price respectively
+Solution:
+
+SQL> select max(price) "max_price", min(price) "min_price"
+  2  from movie;
+
+Output:
+
+ max_price  min_price
+---------- ----------
+      1135        135
+
+• Count the number of movies having price greater than or equal to 150.
+Solution:
+
+SQL> select count(*) from movie
+  2  where price>=150;
+
+Output:
+
+  COUNT(*)
+----------
+         9
+
+• Print the information of invoice table in the following format for all records.
+
+• The Invoice no. of Customer Id {cust_id} is {inv_no} and Movie no. is
+{mv_no}.
+Solution:
+
+SQL> select 'The Invoice no. of Customer Id ' || cust_id || ' is ' || inv_no || ' and Movie no. is ' || mv_no
+  2  from invoice;
+
+Output:
+
+'THEINVOICENO.OFCUSTOMERID'||CUST_ID||'IS'||INV_NO||'ANDMOVIENO.IS'||MV_NO
+--------------------------------------------------------------------------------
+The Invoice no. of Customer Id C1 is I1 and Movie no. is 1
+The Invoice no. of Customer Id C2 is I2 and Movie no. is 2
+The Invoice no. of Customer Id C3 is I3 and Movie no. is 3
+The Invoice no. of Customer Id C4 is I4 and Movie no. is 4
+The Invoice no. of Customer Id C5 is I5 and Movie no. is 5
+The Invoice no. of Customer Id C6 is I6 and Movie no. is 6
+The Invoice no. of Customer Id C7 is I7 and Movie no. is 7
+The Invoice no. of Customer Id C8 is I8 and Movie no. is 8
+The Invoice no. of Customer Id C9 is I9 and Movie no. is 9
+
+• {cust_id} has taken Movie no. {mv_no} on {issue_date} and will return on
+{return_date}
+Solution:
+
+SQL> select cust_id|| ' has taken Movie no. '||mv_no|| ' on '|| issue_date||' and will return on ' || return_date
+  2  from invoice;
+
+Output:
+
+CUST_ID||'HASTAKENMOVIENO.'||MV_NO||'ON'||ISSUE_DATE||'ANDWILLRETURNON'||RETURN_
+--------------------------------------------------------------------------------
+C1 has taken Movie no. 1 on 02-AUG-22 and will return on 02-OCT-22
+C2 has taken Movie no. 2 on 03-AUG-22 and will return on 03-OCT-22
+C3 has taken Movie no. 3 on 04-AUG-22 and will return on 04-OCT-22
+C4 has taken Movie no. 4 on 05-AUG-22 and will return on 05-OCT-22
+C5 has taken Movie no. 5 on 06-AUG-22 and will return on 06-OCT-22
+C6 has taken Movie no. 6 on 07-AUG-22 and will return on 07-OCT-22
+C7 has taken Movie no. 7 on 08-AUG-22 and will return on 08-OCT-22
+C8 has taken Movie no. 8 on 12-SEP-22 and will return on 12-NOV-22
+C9 has taken Movie no. 9 on 15-SEP-22 and will return on 15-NOV-22
+
+Having and Group By:-
+
+• Print the type and average price of each movie.
+Solution:
+
+SQL> select type, avg(price) from movie
+  2  group by type;
+
+Output:
+
+TYPE       AVG(PRICE)
+---------- ----------
+Romance           215
+Fantasy           235
+Tragedy           235
+Action          747.5
+Sci-Fi            514
+
+• Find the number of movies in each type.
+Solution:
+
+SQL> select type, count(type) from movie
+  2  group by type;
+
+Output:
+
+TYPE       COUNT(TYPE)
+---------- -----------
+Romance              1
+Fantasy              1
+Tragedy              1
+Action               2
+Sci-Fi               5
+
+• Count separately the number movies in the ‘Sci-Fi’ and ‘Action’ types.
+Solution:
+
+SQL> select type,count(type)
+  2  from movie
+  3  group by type
+  4  having type in('Sci-Fi','Action');
+
+Output:
+
+TYPE       COUNT(TYPE)
+---------- -----------
+Action               2
+Sci-Fi               5
+
+27.Calculate the average price for each type that has a maximum price of Rs. 550.
+Solution:
+
+SQL> select type,avg(price) from movie where price<=550
+  2  group by type;
+
+Output:
+
+TYPE       AVG(PRICE)
+---------- ----------
+Romance           215
+Fantasy           235
+Tragedy           235
+Action            480
+Sci-Fi         358.75
+
+28.Calculate the average price of all movies where type is ‘Sci-Fi’ or ‘Action’ and
+price is greater than or equal to Rs. 150.
+Solution:
+
+SQL> select sum(avg(price))
+  2  from movie where type = 'Action' or type = 'Sci-Fi'
+  3  group by price
+  4  having price>=150;
+
+Output:
+
+SUM(AVG(PRICE))
+---------------
+           3930
+
+28.a.Calculate the average price of movies with price greater than equal to Rs. 150 and
+type is 'Sci-Fi' and 'Action'.
+Solution:
+
+SQL> select sum(avg(price))
+  2  from movie where price>=150
+  3  group by type
+  4  having type in('Action','Sci-Fi');
+
+Output:
+
+SUM(AVG(PRICE))
+---------------
+        1356.25

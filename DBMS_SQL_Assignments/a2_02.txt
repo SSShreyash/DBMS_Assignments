@@ -1,0 +1,241 @@
+Tables:
+
+SQL> select * from branch;
+
+B_NAME     CITY
+---------- ----------
+SBIMumbai  Mumbai
+PNBDelhi   Delhi
+SBIKolkata Kolkata
+AxisMumbai Mumbai
+ICCIDelhi  Delhi
+PNBKolkata Kolkata
+
+6 rows selected.
+
+SQL> select * from customer;
+
+C_NAME     CITY
+---------- ----------
+SHREYASH   Mumbai
+PAVAN      Kolkata
+BIGHNA     Nagpur
+GRACIE     Delhi
+TAYLOR     Mumbai
+MANISH     Kolkata
+
+6 rows selected.
+
+SQL> select * from borrow;
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L5         TAYLOR     ICCIDelhi        4000
+L6         MANISH     PNBKolkata      14000
+
+6 rows selected.
+
+SQL> select* from deposit;
+
+ACT_NO     C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+131412     SHREYASH   SBIMumbai       10000
+243156     PAVAN      PNBDelhi        13000
+124678     BIGHNA     SBIKolkata       8000
+531245     GRACIE     AxisMumbai      15000
+234616     TAYLOR     ICCIDelhi       20000
+901289     MANISH     PNBKolkata      16000
+
+6 rows selected.
+
+1. Give the name of the customers having living city Nagpur and branch city Kolkata.
+Solution:
+
+select C_name from customer
+JOIN deposit ON customer.C_name = deposit.C_name
+JOIN borrow ON customer.C_name = borrow.C_name
+JOIN branch ON branch.b_name = deposit.b_name or branch.b_name = borrow.b_name
+where branch.city = 'Kolkata' and customer.city = 'Nagpur';
+
+Output:
+
+C_NAME
+----------
+BIGHNA
+
+2. Give the name of the customers having the same living city as their branch city Kolkata.
+Solution:
+
+select C_name from customer
+JOIN deposit ON customer.C_name = deposit.C_name
+JOIN borrow ON customer.C_name = borrow.C_name
+JOIN branch ON branch.b_name = deposit.b_name or branch.b_name = borrow.b_name
+where branch.city = customer.city and branch.city = 'Kolkata';
+
+Output:
+
+C_NAME
+----------
+MANISH
+
+2.a.Give the name of the customers and living city having the same living city as their branch city.
+Solution:
+
+select C_name, customer.City from customer
+JOIN deposit ON customer.C_name = deposit.C_name
+JOIN borrow ON customer.C_name = borrow.C_name
+JOIN branch ON branch.b_name = deposit.b_name or branch.b_name = borrow.b_name
+where branch.city = customer.city;
+
+Output:
+
+C_NAME     CITY
+---------- ----------
+SHREYASH   Mumbai
+MANISH     Kolkata
+
+
+3. Give the name of the customers who are deposits and have same branch city as
+that of SHREYASH.
+Solution:
+
+select customer.C_name from customer
+JOIN deposit ON customer.C_name = deposit.C_name
+JOIN branch ON branch.b_name = deposit.b_name
+where branch.city = (select city from branch where customer.C_name = 'SHREYASH');
+
+Output:
+
+C_NAME
+----------
+SHREYASH
+GRACIE
+
+4. Give the deposit details and loan details of customers in the city where PAVAN is living.
+Solution:
+
+select deposit.act_no, customer.C_name, branch.b_name,borrow.loan_no, borrow.amount as BorrowAmount, deposit.amount as DepositAmount from deposit
+JOIN customer ON customer.C_name = deposit.C_name
+JOIN borrow ON deposit.C_name = borrow.C_name
+JOIN branch ON branch.b_name = deposit.b_name
+where customer.city = (select customer.city from customer where customer.C_name = 'PAVAN');
+
+Output:
+
+
+ACT_NO     C_NAME     B_NAME     LOAN_NO    BORROWAMOUNT DEPOSITAMOUNT
+---------- ---------- ---------- ---------- ------------ -------------
+243156     PAVAN      PNBDelhi   L2                 3000         13000
+901289     MANISH     PNBKolkata L6                14000         16000
+
+5. List the no. of customers who are depositors as well as borrowers.
+Updated Table for this question:
+
+LOAN_NO    C_NAME     B_NAME         AMOUNT
+---------- ---------- ---------- ----------
+L1         SHREYASH   SBIMumbai        2000
+L2         PAVAN      PNBDelhi         3000
+L3         BIGHNA     SBIKolkata       5000
+L4         GRACIE     AxisMumbai       6000
+L6         MANISH     PNBKolkata      14000
+
+Solution:
+
+select count(*) from customer
+JOIN borrow ON borrow.C_name = customer.C_name
+JOIN deposit ON deposit.C_name = borrow.C_name;
+
+Output:
+
+  COUNT(*)
+----------
+         5
+
+6. Give the name of borrowers loan amount greater than loan amount of BIGHNA.
+Solution:
+
+select C_name from borrow 
+where amount > (select amount from borrow where C_name = 'BIGHNA');
+
+Output:
+
+C_NAME
+----------
+GRACIE
+MANISH
+
+7. Give the name of depositors having the same branch city as that of SHREYASH and
+having the same city as that of TAYLOR.
+Updated Table for this question:
+c_name	city
+SHREYASH	Mumbai
+PAVAN		Kolkata
+BIGHNA	Siliguri
+GRACIE	Delhi
+TAYLOR	Mumbai
+MANISH	Kolkata
+
+Solution:
+
+select deposit.C_Name from deposit
+JOIN customer on customer.C_name = deposit.c_name
+JOIN branch on deposit.B_name = branch.B_name
+where branch.city = (select branch.city from branch where b_name = (select b_name from deposit where C_name = 'SHREYASH')) and 
+customer.city = (select city from customer where C_name = 'TAYLOR');
+
+Output:
+
+C_NAME
+----------
+SHREYASH
+
+8. List all the depositors living in city Kolkata & having branch city Delhi .
+Solution:
+
+select deposit.C_Name from deposit
+JOIN customer on customer.C_name = deposit.c_name
+JOIN branch on deposit.B_name = branch.B_name
+where branch.city = 'Delhi' and 
+customer.city = 'Kolkata';
+
+Output:
+
+C_NAME
+----------
+PAVAN
+
+9. List all the Customers who are both depositors & borrowers & living in the
+same city as PAVAN.
+Solution:
+
+select customer.c_name from customer
+JOIN deposit on deposit.c_name = customer.c_name
+JOIN borrow on borrow.c_name = deposit.c_name
+where customer.city = (select city from customer where customer.c_name = 'PAVAN'); 
+
+Output:
+
+C_NAME
+----------
+PAVAN
+MANISH
+
+10.List the customers who are borrowers or depositors & having living city Kolkata
+& branch city same as that of GRACIE.
+Solution:
+
+select customer.c_name from customer
+JOIN deposit on deposit.c_name = customer.c_name
+JOIN borrow on borrow.c_name = customer.c_name
+JOIN branch ON branch.b_name = deposit.b_name or branch.b_name = borrow.b_name
+where customer.city = 'Kolkata' and 
+branch.city = (select branch.city from branch where b_name = (select b_name from deposit where C_name = 'BIGHNA')); 
+
+Output:
+C_NAME
+----------
+MANISH
